@@ -30,6 +30,7 @@ __all__ = [
     'Products',
     'Recommendations',
     'Sellers',
+    'Subscriptions',
 ]
 
 # See https://images-na.ssl-images-amazon.com/images/G/01/mwsportal/doc/en_US/bde/MWSDeveloperGuide._V357736853_.pdf page 8
@@ -652,4 +653,113 @@ class Recommendations(MWS):
 
         data = dict(Action="ListRecommendationsByNextToken",
                     NextToken=token)
+        return self.make_request(data, "POST")
+
+class Subscriptions(MWS):
+    """ Amazon MWS Subscriptions API """
+
+    URI = '/Subscriptions/2013-07-01'
+    VERSION = '2013-07-01'
+    NS = "{https://mws.amazonservices.com/Subscriptions/2013-07-01}"
+
+    def register_destination(self, marketplaceid, destination_uri):
+        """
+        Specifies a new destination where you want to receive notifications.
+        """
+
+        data = dict(Action="RegisterDestination",
+                    MarketplaceId=marketplaceid )
+        data.update({'Destination.AttributeList.member.1.Key' : 'sqsQueueUrl' } )
+        data.update({'Destination.AttributeList.member.1.Value' : destination_uri } )
+        data.update({'Destination.DeliveryChannel' : 'SQS' } )
+        return self.make_request(data, "POST")
+
+    def deregister_destination(self, marketplaceid, destination_uri):
+        """
+        Removes an existing destination from the list of registered destinations.
+        """
+
+        data = dict(Action="DeregisterDestination",
+                    MarketplaceId=marketplaceid )
+        data.update({'Destination.AttributeList.member.1.Key' : 'sqsQueueUrl' } )
+        data.update({'Destination.AttributeList.member.1.Value' : destination_uri } )
+        data.update({'Destination.DeliveryChannel' : 'SQS' } )
+        return self.make_request(data, "POST")
+
+    def list_registered_destinations(self, marketplaceid):
+        """
+        Lists all current destinations that you have registered.	
+        """
+
+        data = dict(Action="ListRegisteredDestinations",
+                    MarketplaceId=marketplaceid )
+        return self.make_request(data, "POST")
+  
+    def send_test_notification_to_destination(self, marketplaceid, destination):
+        """
+        Sends a test notification to an existing destination.
+        """
+        data = dict(Action="SendTestNotificationToDestination",
+                    MarketplaceId=marketplaceid )
+        data.update({'Destination.AttributeList.member.1.Key' : 'sqsQueueUrl' } )
+        data.update({'Destination.AttributeList.member.1.Value' : destination } )
+        data.update({'Destination.DeliveryChannel' : 'SQS' } )
+        return self.make_request(data, "POST")
+
+    def create_subscription(self, marketplaceid, destination, type, is_enabled=True):
+        """
+        Creates a new subscription for the specified notification type and destination.
+        """
+        data = dict(Action="CreateSubscription",
+                    MarketplaceId=marketplaceid )
+        data.update({'Subscription.Destination.AttributeList.member.1.Key' : 'sqsQueueUrl' } )
+        data.update({'Subscription.Destination.AttributeList.member.1.Value' : destination } )
+        data.update({'Subscription.Destination.DeliveryChannel' : 'SQS' } )
+        data.update({'Subscription.IsEnabled' : str(is_enabled).lower() } )
+        data.update({'Subscription.NotificationType' : type } )
+        return self.make_request(data, "POST")
+
+    def get_subscription(self, marketplaceid, destination, type):
+        """
+        Gets the subscription for the specified notification type and destination.	
+        """
+        data = dict(Action="GetSubscription",
+                    MarketplaceId=marketplaceid )
+        data.update({'Destination.AttributeList.member.1.Key' : 'sqsQueueUrl' } )
+        data.update({'Destination.AttributeList.member.1.Value' : destination } )
+        data.update({'Destination.DeliveryChannel' : 'SQS' } )
+        data.update({'NotificationType' : type } )
+        return self.make_request(data, "POST")
+
+    def delete_subscription(self, marketplaceid, destination, type):
+        """
+        Deletes the subscription for the specified notification type and destination.	
+        """
+        data = dict(Action="DeleteSubscription",
+                    MarketplaceId=marketplaceid )
+        data.update({'Destination.AttributeList.member.1.Key' : 'sqsQueueUrl' } )
+        data.update({'Destination.AttributeList.member.1.Value' : destination } )
+        data.update({'Destination.DeliveryChannel' : 'SQS' } )
+        data.update({'NotificationType' : type } )
+        return self.make_request(data, "POST")
+
+    def list_subscription(self, marketplaceid):
+        """
+        Returns a list of all your current subscriptions.		
+        """
+        data = dict(Action="ListSubscriptions",
+                    MarketplaceId=marketplaceid )
+        return self.make_request(data, "POST")
+
+    def update_subscription(self, marketplaceid, destination, type, is_enabled=True):
+        """
+        Updates the subscription for the specified notification type and destination.			
+        """
+        data = dict(Action="UpdateSubscription",
+                    MarketplaceId=marketplaceid )
+        data.update({'Subscription.Destination.AttributeList.member.1.Key' : 'sqsQueueUrl' } )
+        data.update({'Subscription.Destination.AttributeList.member.1.Value' : destination } )
+        data.update({'Subscription.Destination.DeliveryChannel' : 'SQS' } )
+        data.update({'Subscription.IsEnabled' : str(is_enabled).lower() } )
+        data.update({'Subscription.NotificationType' : type } )
         return self.make_request(data, "POST")
